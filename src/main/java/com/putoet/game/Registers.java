@@ -36,6 +36,6 @@ public class Registers {
 
     public static String asLetter(int id) {
         checkId(id);
-        return String.valueOf((char) ('a' + (id - ARCH_MAX_VALUE)));
+        return "<" + (char) ('a' + (id - ARCH_MAX_VALUE)) + ">";
     }
 }

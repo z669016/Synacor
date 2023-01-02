@@ -5,21 +5,24 @@ public class InstructionBase implements Instruction {
     private final int operandCount;
     protected final Register ip;
     protected final int[] operand;
+    private final Registers registers;
 
     public InstructionBase(Opcode opcode, Register ip) {
         this.opcode = opcode;
         this.operandCount = 0;
         this.ip = ip;
         this.operand = new int[0];
+        this.registers = null;
     }
 
-    public InstructionBase(Opcode opcode, int operandCount, Register ip, Memory memory) {
+    public InstructionBase(Opcode opcode, int operandCount, Register ip, Memory memory, Registers registers) {
         if (ip.get() + operandCount >= memory.size())
             throw new OutOfMemoryError("IP=" + ip.get() + " using operand " + operandCount);
 
         this.opcode = opcode;
         this.operandCount = operandCount;
         this.ip = ip;
+        this.registers = registers;
 
         this.operand = new int[operandCount];
         for (int i = 0; i < operandCount; i++) {
@@ -53,7 +56,10 @@ public class InstructionBase implements Instruction {
         sb.append(opcode);
         for (var op : operand) {
             sb.append(" ");
-            sb.append(op);
+            if (Registers.isRegister(op))
+                sb.append(Registers.asLetter(op)).append(" (").append(registers.get(op)).append(")");
+            else
+                sb.append(op);
         }
         return sb.toString();
     }

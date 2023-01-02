@@ -15,13 +15,14 @@ class InstructionBaseTest {
     void setup() {
         ip = Mockito.mock(Register.class);
         memory = Mockito.mock(Memory.class);
+        Registers registers = Mockito.mock(Registers.class);
 
         Mockito.when(ip.get()).thenReturn(0);
         Mockito.when(memory.size()).thenReturn(10);
         Mockito.when(memory.read(1)).thenReturn(3);
         Mockito.when(memory.read(2)).thenReturn(7);
         Mockito.when(memory.read(3)).thenReturn(19);
-        instruction = new InstructionBase(Opcode.ADD, 3, ip, memory);
+        instruction = new InstructionBase(Opcode.ADD, 3, ip, memory, registers);
     }
 
     @Test

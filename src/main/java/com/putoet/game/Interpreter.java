@@ -23,21 +23,21 @@ public class Interpreter {
         return switch (opcode) {
             case HALT -> new InstructionBase(opcode, ip);
 
-            case SET -> new InstructionBase(opcode,2, ip, memory) {
+            case SET -> new InstructionBase(opcode,2, ip, memory, registers) {
                 @Override
                 public void execute() {
                     registers.set(operand[0], value(ip, registers, operand[1]));
                 }
             };
 
-            case PUSH -> new InstructionBase(opcode, 1, ip, memory) {
+            case PUSH -> new InstructionBase(opcode, 1, ip, memory, registers) {
                 @Override
                 public void execute() {
                     stack.push(value(ip, registers, operand[0]));
                 }
             };
 
-            case POP -> new InstructionBase(opcode, 1, ip, memory) {
+            case POP -> new InstructionBase(opcode, 1, ip, memory, registers) {
                 @Override
                 public void execute() {
                     var value = stack.pop();
@@ -45,7 +45,7 @@ public class Interpreter {
                 }
             };
 
-            case EQ -> new InstructionBase(opcode, 3, ip, memory) {
+            case EQ -> new InstructionBase(opcode, 3, ip, memory, registers) {
                 @Override
                 public void execute() {
                     final var value1 = value(ip, registers, operand[1]);
@@ -54,7 +54,7 @@ public class Interpreter {
                 }
             };
 
-            case GT -> new InstructionBase(opcode, 3, ip, memory) {
+            case GT -> new InstructionBase(opcode, 3, ip, memory, registers) {
                 @Override
                 public void execute() {
                     final var value1 = value(ip, registers, operand[1]);
@@ -63,7 +63,7 @@ public class Interpreter {
                 }
             };
 
-            case JMP -> new InstructionBase(opcode, 1, ip, memory) {
+            case JMP -> new InstructionBase(opcode, 1, ip, memory, registers) {
                 @Override
                 public void execute() {
                 }
@@ -74,7 +74,7 @@ public class Interpreter {
                 }
             };
 
-            case JT -> new InstructionBase(opcode, 2, ip, memory) {
+            case JT -> new InstructionBase(opcode, 2, ip, memory, registers) {
                 @Override
                 public void run() {
                     final var value = value(ip, registers, operand[0]);
@@ -85,7 +85,7 @@ public class Interpreter {
                 }
             };
 
-            case JF -> new InstructionBase(opcode, 2, ip, memory) {
+            case JF -> new InstructionBase(opcode, 2, ip, memory, registers) {
                 @Override
                 public void run() {
                     final var value = value(ip, registers, operand[0]);
@@ -96,7 +96,7 @@ public class Interpreter {
                 }
             };
 
-            case ADD -> new InstructionBase(opcode, 3, ip, memory) {
+            case ADD -> new InstructionBase(opcode, 3, ip, memory, registers) {
                 @Override
                 public void execute() {
                     final var value1 = value(ip, registers, operand[1]);
@@ -105,7 +105,7 @@ public class Interpreter {
                 }
             };
 
-            case MULT -> new InstructionBase(opcode, 3, ip, memory) {
+            case MULT -> new InstructionBase(opcode, 3, ip, memory, registers) {
                 @Override
                 public void execute() {
                     final var value1 = value(ip, registers, operand[1]);
@@ -114,7 +114,7 @@ public class Interpreter {
                 }
             };
 
-            case MOD -> new InstructionBase(opcode, 3, ip, memory) {
+            case MOD -> new InstructionBase(opcode, 3, ip, memory, registers) {
                 @Override
                 public void execute() {
                     final var value1 = value(ip, registers, operand[1]);
@@ -123,7 +123,7 @@ public class Interpreter {
                 }
             };
 
-            case AND -> new InstructionBase(opcode, 3, ip, memory) {
+            case AND -> new InstructionBase(opcode, 3, ip, memory, registers) {
                 @Override
                 public void execute() {
                     final var value1 = value(ip, registers, operand[1]);
@@ -132,7 +132,7 @@ public class Interpreter {
                 }
             };
 
-            case OR -> new InstructionBase(opcode, 3, ip, memory) {
+            case OR -> new InstructionBase(opcode, 3, ip, memory, registers) {
                 @Override
                 public void execute() {
                     final var value1 = value(ip, registers, operand[1]);
@@ -141,7 +141,7 @@ public class Interpreter {
                 }
             };
 
-            case NOT -> new InstructionBase(opcode, 2, ip, memory) {
+            case NOT -> new InstructionBase(opcode, 2, ip, memory, registers) {
                 @Override
                 public void execute() {
                     final var value = value(ip, registers, operand[1]);
@@ -149,7 +149,7 @@ public class Interpreter {
                 }
             };
 
-            case RMEM -> new InstructionBase(opcode, 2, ip, memory) {
+            case RMEM -> new InstructionBase(opcode, 2, ip, memory, registers) {
                 @Override
                 public void execute() {
                     final var value = memory.read(value(ip, registers, operand[1]));
@@ -157,7 +157,7 @@ public class Interpreter {
                 }
             };
 
-            case WMEM -> new InstructionBase(opcode, 2, ip, memory) {
+            case WMEM -> new InstructionBase(opcode, 2, ip, memory, registers) {
                 @Override
                 public void execute() {
                     final var value = value(ip, registers, operand[1]);
@@ -166,7 +166,7 @@ public class Interpreter {
                 }
             };
 
-            case CALL -> new InstructionBase(opcode, 1, ip, memory) {
+            case CALL -> new InstructionBase(opcode, 1, ip, memory, registers) {
                 @Override
                 public void run() {
                     stack.push(ip.get() + size());
@@ -183,15 +183,32 @@ public class Interpreter {
                 }
             };
 
-            case OUT -> new InstructionBase(opcode, 1, ip, memory) {
+            case OUT -> new InstructionBase(opcode, 1, ip, memory, registers) {
                 @Override
                 public void execute() {
                     final var value = value(ip, registers, operand[0]);
                     io.out(value);
                 }
+
+                @Override
+                public String toString() {
+                    final StringBuilder sb = new StringBuilder();
+                    sb.append(opcode);
+                    for (var op : operand) {
+                        sb.append(" ");
+                        if (Registers.isRegister(op))
+                            sb.append(Registers.asLetter(op))
+                                    .append(" ('")
+                                    .append(registers.get(op) == '\n' ? "\\n" : (char) registers.get(op))
+                                    .append("')");
+                        else
+                            sb.append("'").append(op == '\n' ? "\\n" : (char) op).append("'");
+                    }
+                    return sb.toString();
+                }
             };
 
-            case IN -> new InstructionBase(opcode, 1, ip, memory) {
+            case IN -> new InstructionBase(opcode, 1, ip, memory, registers) {
                 @Override
                 public void execute() {
                     var value = io.in();

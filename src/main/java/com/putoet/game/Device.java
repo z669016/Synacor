@@ -1,11 +1,11 @@
 package com.putoet.game;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import lombok.SneakyThrows;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Device implements Runnable {
 
@@ -14,6 +14,10 @@ public class Device implements Runnable {
     private final InputOutput io;
     private final Register ip = new Register();
     private final Stack<Integer> stack = new Stack<>();
+    private final AtomicBoolean running = new AtomicBoolean(false);
+
+    private boolean debug;
+    private boolean step;
 
     public Device(Registers registers, Memory memory, InputOutput io) {
         this.registers = registers;
@@ -74,15 +78,47 @@ public class Device implements Runnable {
         return stack;
     }
 
+    public void enableDebug() {
+        this.debug = true;
+    }
+
+    public void disableDebug() {
+        this.debug = true;
+    }
+
+    public void enableStep() {
+        this.step = true;
+        enableDebug();
+    }
+
+    public void disableStep() {
+        this.step = false;
+        disableDebug();
+    }
+
     @Override
     public void run() {
+        running.set(true);
+
         final Interpreter interpreter = new Interpreter(registers, memory, stack, io);
 
         var instruction = interpreter.next(ip());
-        while (instruction.opcode() != Opcode.HALT) {
+        while (instruction.opcode() != Opcode.HALT && running.get()) {
+            if (debug)
+                io.err("%05d: %s%n".formatted(ip.get(), instruction));
+
+            if (step) {
+                final Scanner scan = new Scanner(System.in);
+                scan.nextLine();
+            }
+
             instruction.run();
             instruction = interpreter.next(ip());
         }
+    }
+
+    public void exit() {
+        running.set(false);
     }
 
     public void reset() {
@@ -93,20 +129,97 @@ public class Device implements Runnable {
             stack.pop();
     }
 
-    public List<String> dump() {
+    public List<String> dump(int startAddress) {
         final List<String> dump = new ArrayList<>();
         final Interpreter interpreter = new Interpreter(registers, memory, stack, io);
 
         final Register ip = new Register();
+        ip.accept(startAddress);
+        try {
+            while (ip.get() <= memory.lastAddressUsed()) {
+                var instruction = interpreter.next(ip);
+                dump.add(instruction.toString());
+                ip.accept(ip.get() + instruction.size());
+            }
+        } catch (RuntimeException exc) {
+            dump.add("Failed decompilation at address " + ip.get() + "(" + exc.getMessage() + ")");
+        }
+
+        return dump;
+    }
+
+    public List<String> dump(int startAddress, Set<Opcode> exitCriteria) {
+        final List<String> dump = new ArrayList<>();
+        final Interpreter interpreter = new Interpreter(registers, memory, stack, io);
+
+        final Register ip = new Register();
+        ip.accept(startAddress);
         while (ip.get() <= memory.lastAddressUsed()) {
             var instruction = interpreter.next(ip);
             dump.add(instruction.toString());
+
+            if (exitCriteria.contains(instruction.opcode()))
+                break;
+
             ip.accept(ip.get() + instruction.size());
         }
 
         return dump;
     }
 
+    public List<String> hexDump() {
+        final List<String> dump = new ArrayList<>();
+
+        int offset = 0;
+        while (offset < memory.lastAddressUsed()) {
+            dump.add(hexDump(offset));
+            offset += 16;
+        }
+
+        return dump;
+    }
+
+    public String hexDump(int offset) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("%04x".formatted(offset)).append(" | ");
+        for (int i = 0; i < 16; i++) {
+            if (offset + i < memory.lastAddressUsed()) {
+                final byte[] bytes = Memory.intToBytes(memory().read(offset + i));
+                sb.append("%02x %02x ".formatted(bytes[0], bytes[1]));
+            } else {
+                sb.append(".. .. ");
+            }
+        }
+
+        sb.append("| ");
+
+        for (int i = 0; i < 16; i++) {
+            if (offset + i < memory.lastAddressUsed()) {
+                final byte[] bytes = Memory.intToBytes(memory().read(offset + i));
+                sb.append(new String(bytes, StandardCharsets.UTF_8)
+                                .replaceAll("\\P{Print}", "."))
+                        .append(" ");
+            } else {
+                sb.append(".. ");
+            }
+        }
+
+        sb.append("| ");
+        for (int i = 0; i < 16; i++) {
+            if (offset + i < memory.lastAddressUsed()) {
+                final byte[] bytes = Memory.intToBytes(memory().read(offset + i));
+                sb.append(String.valueOf((char) bytes[0]).replaceAll("\\P{Print}", "."));
+            } else {
+                sb.append(".");
+            }
+        }
+
+        sb.append(" |");
+
+        return sb.toString();
+    }
+
+    @SneakyThrows
     public static void main(String[] args) {
         final Registers registers = new Registers();
         final Memory memory = new Memory();
@@ -114,7 +227,8 @@ public class Device implements Runnable {
         final Device device = new Device(registers, memory, io);
 
         device.loadResource("/challenge.bin");
-        device.run();
-//        device.dump().forEach(System.out::println);
+        device.dump(0).forEach(System.err::println);
+        System.out.println();
+        device.hexDump().forEach(line -> io.err(line + "\n"));
     }
 }

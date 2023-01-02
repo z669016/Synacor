@@ -10,9 +10,16 @@ import static com.diogonunes.jcolor.Ansi.colorize;
 
 public class Crt extends OutputStream {
     private final OutputStream out;
+    private final OutputStream err;
 
     public Crt(OutputStream out) {
         this.out = out;
+        this.err = System.err;
+    }
+
+    public Crt(OutputStream out, OutputStream err) {
+        this.out = out;
+        this.err = err;
     }
 
     @SneakyThrows

@@ -43,6 +43,6 @@ class DeviceTest {
     @Test
     void dump() {
         device.load(9,32768,32769,4,19,32768, 0);
-        assertEquals(List.of("ADD 32768 32769 4", "OUT 32768", "HALT"), device.dump());
+        assertEquals(List.of("ADD 32768 32769 4", "OUT 32768", "HALT"), device.dump(0));
     }
 }
