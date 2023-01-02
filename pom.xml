@@ -16,6 +16,7 @@
     <commons-math3.version>3.6.1</commons-math3.version>
     <commons-lang3.version>3.12.0</commons-lang3.version>
     <javatuples.version>1.2</javatuples.version>
+    <JColor.version>5.5.1</JColor.version>
   </properties>
 
   <dependencies>
@@ -51,6 +52,11 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
       <version>${commons-lang3.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.diogonunes</groupId>
+      <artifactId>JColor</artifactId>
+      <version>${JColor.version}</version>
     </dependency>
   </dependencies>
 </project>
