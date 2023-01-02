@@ -1,4 +1,4 @@
-package com.putoet;
+package com.putoet.game;
 
 public class Memory {
     private final byte[] memory = new byte[Registers.ARCH_MAX_VALUE * 2];

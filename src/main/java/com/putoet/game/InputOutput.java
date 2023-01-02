@@ -1,17 +1,20 @@
-package com.putoet;
+package com.putoet.game;
+
+import lombok.SneakyThrows;
 
 import java.io.*;
 
 public class InputOutput {
     private final InputStream in;
-    private final PrintStream out;
+    private final OutputStream out;
 
-    public InputOutput(InputStream in, PrintStream out) {
+    public InputOutput(InputStream in, OutputStream out) {
         this.in = in;
         this.out = out;
     }
 
 
+    @SneakyThrows
     public void out(int c) {
         out.write((char) c);
     }

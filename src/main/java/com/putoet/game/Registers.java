@@ -1,4 +1,4 @@
-package com.putoet;
+package com.putoet.game;
 
 public class Registers {
     public static final int ARCH_MAX_VALUE = 32768;

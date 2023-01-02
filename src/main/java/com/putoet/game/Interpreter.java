@@ -1,4 +1,4 @@
-package com.putoet;
+package com.putoet.game;
 
 import java.util.Stack;
 

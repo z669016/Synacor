@@ -1,4 +1,4 @@
-package com.putoet;
+package com.putoet.game;
 
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -6,33 +6,25 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.OutputStream;
 import java.util.List;
-import java.util.Stack;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 
 class DeviceTest {
     private Registers registers;
-    private Memory memory;
-    private InputOutput io;
-    private Stack<Integer> stack;
-    private Register ip;
-    private InputStream in;
-    private PrintStream out;
+    private OutputStream out;
     private Device device;
 
     @BeforeEach
     void setup() {
-        in = Mockito.mock(InputStream.class);
-        out = Mockito.mock(PrintStream.class);
+        InputStream in = Mockito.mock(InputStream.class);
+        out = Mockito.mock(OutputStream.class);
 
-        memory = new Memory();
+        Memory memory = new Memory();
         registers = new Registers();
-        io = new InputOutput(in, out);
-        stack = new Stack<>();
-        ip = new Register();
+        InputOutput io = new InputOutput(in, out);
 
         device = new Device(registers, memory, io);
     }

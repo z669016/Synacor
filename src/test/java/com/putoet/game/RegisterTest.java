@@ -1,6 +1,5 @@
-package com.putoet;
+package com.putoet.game;
 
-import com.putoet.Register;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

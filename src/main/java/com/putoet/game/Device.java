@@ -1,4 +1,4 @@
-package com.putoet;
+package com.putoet.game;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -22,26 +22,36 @@ public class Device implements Runnable {
     }
 
     public void load(String binaryFileName) {
-        int offset = 0;
-        try (InputStream inputStream = new FileInputStream(binaryFileName)) {
-            int byte1Read, byte2Read;
-
-            while ((byte1Read = inputStream.read()) != -1 && (byte2Read = inputStream.read()) != -1) {
-                memory.write(offset++, Memory.bytesToInt((byte) byte1Read, (byte) byte2Read));
-            }
+        try (InputStream is = new FileInputStream(binaryFileName)) {
+            loadStream(is);
         } catch (IOException exc) {
             throw new IllegalArgumentException("Failed to load file " + binaryFileName, exc);
+        }
+    }
+
+    public void loadResource(String resourceName) {
+        try (InputStream is = this.getClass().getResourceAsStream(resourceName)) {
+            assert is != null;
+
+            loadStream(is);
+        } catch (IOException exc) {
+            throw new IllegalArgumentException("Failed to load resource " + resourceName, exc);
+        }
+    }
+
+    public void loadStream(InputStream is) throws IOException {
+        assert is != null;
+
+        final byte[] data = is.readAllBytes();
+        for (int i = 0, offset = 0; i < data.length; i += 2) {
+            final int word = Memory.bytesToInt(data[i], data[i+1]);
+            memory.write(offset++, word);
         }
     }
 
     public void load(int... program) {
         for (int offset = 0; offset < program.length; offset++)
             memory.write(offset, program[offset]);
-    }
-
-    public void load(List<Integer> program) {
-        for (int offset = 0; offset < program.size(); offset++)
-            memory.write(offset, program.get(offset));
     }
 
     public Memory memory() {
@@ -103,7 +113,7 @@ public class Device implements Runnable {
         final InputOutput io = new InputOutput(System.in, System.out);
         final Device device = new Device(registers, memory, io);
 
-        device.load("/Users/renevanputten/Downloads/synacor-challenge/challenge.bin");
+        device.loadResource("/challenge.bin");
         device.run();
 //        device.dump().forEach(System.out::println);
     }

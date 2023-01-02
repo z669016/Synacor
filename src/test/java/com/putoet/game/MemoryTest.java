@@ -1,4 +1,4 @@
-package com.putoet;
+package com.putoet.game;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

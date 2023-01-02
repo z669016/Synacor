@@ -1,4 +1,4 @@
-package com.putoet;
+package com.putoet.game;
 
 public class InstructionBase implements Instruction {
     protected final Opcode opcode;

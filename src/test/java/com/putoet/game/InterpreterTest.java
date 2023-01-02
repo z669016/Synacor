@@ -1,4 +1,4 @@
-package com.putoet;
+package com.putoet.game;
 
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.OutputStream;
 import java.util.Stack;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -15,21 +15,20 @@ import static org.mockito.Mockito.*;
 class InterpreterTest {
     private Registers registers;
     private Memory memory;
-    private InputOutput io;
     private Stack<Integer> stack;
     private Register ip;
     private InputStream in;
-    private PrintStream out;
+    private OutputStream out;
     private Interpreter interpreter;
 
     @BeforeEach
     void setup() {
         in = Mockito.mock(InputStream.class);
-        out = Mockito.mock(PrintStream.class);
+        out = Mockito.mock(OutputStream.class);
         memory = mock(Memory.class);
 
         registers = new Registers();
-        io = new InputOutput(in, out);
+        InputOutput io = new InputOutput(in, out);
         stack = new Stack<>();
         ip = new Register();
 
@@ -384,6 +383,6 @@ class InterpreterTest {
         instruction.run();
 
         assertEquals(2, ip.get());
-        assertEquals((int) 's', registers.get(32768));
+        assertEquals('s', registers.get(32768));
     }
 }
