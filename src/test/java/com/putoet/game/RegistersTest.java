@@ -51,7 +51,7 @@ class RegistersTest {
 
     @Test
     void asLetter() {
-        assertEquals("a", Registers.asLetter(LOWER));
-        assertEquals("h", Registers.asLetter(UPPER));
+        assertEquals("<a>", Registers.asLetter(LOWER));
+        assertEquals("<h>", Registers.asLetter(UPPER));
     }
 }

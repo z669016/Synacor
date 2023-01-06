@@ -24,20 +24,19 @@ public class Player {
         final Crt crt = new Crt(System.out);
         final Registers registers = new Registers();
         final Memory memory = new Memory();
-        final CommandProcessor commandProcessor = new CommandProcessor();
-        final Keyboard keyboard = new Keyboard(crt, commandProcessor);
+        final Keyboard keyboard = new Keyboard(crt);
         final InputOutput io = new InputOutput(keyboard, crt, err);
         final Device device = new Device(registers, memory, io);
+        final Debugger debugger = new Debugger(keyboard, device);
 
         device.loadResource("/challenge.bin");
-        commandProcessor.setDevice(device);
 
         final Thread deviceThread = new Thread(device);
 //        device.enableDebug();
         deviceThread.start();
 
         list("/solution.txt").forEach(command -> keyboard.accept(command + "\n"));
-        final Thread keyboardThread = new Thread(keyboard);
+        final Thread keyboardThread = new Thread(debugger);
         keyboardThread.start();
 
         deviceThread.join();

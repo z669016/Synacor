@@ -8,9 +8,7 @@ public class Register implements Supplier<Integer>, Consumer<Integer> {
 
     @Override
     public String toString() {
-        return "Register{" +
-               "value=" + value +
-               '}';
+        return String.valueOf(value);
     }
 
     @Override

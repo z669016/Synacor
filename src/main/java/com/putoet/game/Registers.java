@@ -38,4 +38,15 @@ public class Registers {
         checkId(id);
         return "<" + (char) ('a' + (id - ARCH_MAX_VALUE)) + ">";
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("Registers=[").append((char) ('a')).append('=').append(registers[0]);
+        for (int i = 1; i < registers.length; i++) {
+            sb.append(", ").append((char) (i + 'a')).append('=').append(registers[i]);
+        }
+        sb.append("]");
+        return sb.toString();
+    }
 }

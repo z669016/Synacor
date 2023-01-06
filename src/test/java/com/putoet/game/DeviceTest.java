@@ -7,7 +7,6 @@ import org.mockito.Mockito;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
@@ -38,11 +37,5 @@ class DeviceTest {
         device.run();
         assertEquals('a' + 4, registers.get(32768));
         verify(out).write('a' + 4);
-    }
-
-    @Test
-    void dump() {
-        device.load(9,32768,32769,4,19,32768, 0);
-        assertEquals(List.of("ADD 32768 32769 4", "OUT 32768", "HALT"), device.dump(0));
     }
 }

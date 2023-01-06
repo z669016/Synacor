@@ -12,17 +12,14 @@ import java.util.function.Consumer;
 public class Keyboard extends InputStream implements Runnable, Consumer<String>{
     private final Queue<String> queue = new ArrayBlockingQueue <>(1000);
     private final Crt crt;
-    private final CommandProcessor commandProcessor;
-
     private String currentCommand = null;
     private int offset = 0;
+    private boolean running = true;
 
-    public Keyboard(Crt crt, CommandProcessor commandProcessor) {
+    public Keyboard(Crt crt) {
         assert crt != null;
-        assert commandProcessor != null;
 
         this.crt = crt;
-        this.commandProcessor = commandProcessor;
     }
 
     @SneakyThrows
@@ -48,19 +45,12 @@ public class Keyboard extends InputStream implements Runnable, Consumer<String>{
         return c;
     }
 
+    @Override
     public void run() {
         final Scanner scan = new Scanner(System.in);
         String command = scan.nextLine();
-        while (true) {
-            if (!commandProcessor.execute(command)) {
-                queue.offer(command + "\n");
-            }
-
-            if ("exit".equals(command)) {
-                queue.offer("\n"); // enforce the io-loop of the device to run
-                break;
-            }
-
+        while (true && running) {
+            queue.offer(command + "\n");
             command = scan.nextLine();
         }
     }
@@ -68,5 +58,9 @@ public class Keyboard extends InputStream implements Runnable, Consumer<String>{
     @Override
     public void accept(String command) {
         queue.offer(command);
+    }
+
+    public void exit() {
+        running = false;
     }
 }
