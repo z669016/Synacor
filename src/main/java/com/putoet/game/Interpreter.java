@@ -1,3 +1,14 @@
+/**
+ * Instruction class
+ * Fetches an instruction from Memory at the position indicated by a Register (instruction pointer). The Instruction
+ * is a dynamically created object which implements the Instruction interface and will be a child from InstructionBase.
+ * In order to create the Instruction, and fetch it from memory including its operands, the interpreter needs access
+ * to Memory, the Stack, the IP register and the In and Output components of the device.
+ * Access to the stack is used for RET and CALL instructions. Access to the In component is used byt the IN instruction,
+ * while access to the Out component is required for the OUT instructions. All instructions require access to
+ * the IP register, and any instruction with operands requires access to the Registers components (as an operand value
+ * of 32678 and could refer to a register and not a value or memory location).
+ */
 package com.putoet.game;
 
 import lombok.SneakyThrows;
@@ -15,6 +26,15 @@ public class Interpreter {
     private final InputStream in;
     private final OutputStream out;
 
+    /**
+     * Constructor for Interpreter
+     *
+     * @param registers Registers component
+     * @param memory Memory component
+     * @param stack Stack component
+     * @param in In component
+     * @param out Out component
+     */
     public Interpreter(Registers registers, Memory memory, Stack<Integer> stack, InputStream in, OutputStream out) {
         this.registers = registers;
         this.memory = memory;
@@ -23,6 +43,13 @@ public class Interpreter {
         this.out = out;
     }
 
+    /**
+     * Fetch an Instruction from memory, including its operands, and link it to Ip register, memory, and registers.
+     * The memory address of the first instruction word is pointed to by the register value.
+     *
+     * @param ip Register (instruction pointer)
+     * @return Instruction instance
+     */
     public Instruction next(Register ip) {
         var opcode = Opcode.values()[memory.read(ip.get())];
 
@@ -230,6 +257,17 @@ public class Interpreter {
         };
     }
 
+    /**
+     * Returns a number value. In case the number is a register id, this method returns the register value. If not
+     * the method simply returns the number value. This method returns an IllegalStateException when the number
+     * is not a normal value nor a register ID, with a reference to the current IP, so you know where in the program
+     * the invalid number value is referenced.
+     *
+     * @param ip Register IP
+     * @param registers Registers component
+     * @param number in number value
+     * @return int
+     */
     private static int value(Register ip, Registers registers, int number) {
         if (number >= ILLEGAL_NUMBER)
             throw new IllegalStateException("Invalid number encountered '" + number + "' for instruction at " + ip.get());

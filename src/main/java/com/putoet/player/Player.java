@@ -1,11 +1,15 @@
+/**
+ * Player class
+ * Creates a device, loads a program from a resource called "/challenge.bin", and loads keyboard commands from
+ * a resource called "/solution.txt" which all get fed into the keyboard buffer for processing.
+ * Connects a Debugger to the device,a d runs the device and keyboard in separate threads.
+ */
 package com.putoet.player;
 
 import com.putoet.game.*;
 import lombok.SneakyThrows;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,9 +20,7 @@ public class Player {
 
     @SneakyThrows
     public static void main(String[] args) {
-         final OutputStream err =  new FileOutputStream("player.txt");
-
-        final Crt crt = new Crt(System.out);
+        final Crt crt = new Crt();
         final Registers registers = new Registers();
         final Memory memory = new Memory();
         final Keyboard keyboard = new Keyboard(crt);
@@ -36,10 +38,14 @@ public class Player {
 
         deviceThread.join();
         keyboardThread.join();
-
-         err.close();
     }
 
+    /**
+     * Load keyboard commands from a resource file
+     *
+     * @param resourceName String
+     * @return List of commands (strings)
+     */
     @SneakyThrows
     public static List<String> list(String resourceName) {
         final URL url = Player.class.getResource(resourceName);
