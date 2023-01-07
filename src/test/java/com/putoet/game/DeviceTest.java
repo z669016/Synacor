@@ -5,27 +5,24 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 
 class DeviceTest {
     private Registers registers;
-    private OutputStream out;
+    private Crt out;
     private Device device;
 
     @BeforeEach
     void setup() {
-        InputStream in = Mockito.mock(InputStream.class);
-        out = Mockito.mock(OutputStream.class);
+        Keyboard in = Mockito.mock(Keyboard.class);
+        out = Mockito.mock(Crt.class);
 
         Memory memory = new Memory();
         registers = new Registers();
-        InputOutput io = new InputOutput(in, out);
 
-        device = new Device(registers, memory, io);
+        device = new Device(registers, memory, in, out);
     }
 
     @SneakyThrows

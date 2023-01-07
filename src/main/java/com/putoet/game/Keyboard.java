@@ -1,35 +1,41 @@
-package com.putoet.player;
+package com.putoet.game;
 
-import lombok.SneakyThrows;
+import com.diogonunes.jcolor.Attribute;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.Consumer;
 
+import static com.diogonunes.jcolor.Ansi.colorize;
+
 public class Keyboard extends InputStream implements Runnable, Consumer<String>{
+    public static final Attribute TXT_COLOR = Attribute.GREEN_TEXT();
     private final Queue<String> queue = new ArrayBlockingQueue <>(1000);
-    private final Crt crt;
+    private final OutputStream out;
     private String currentCommand = null;
     private int offset = 0;
     private boolean running = true;
 
-    public Keyboard(Crt crt) {
-        assert crt != null;
+    public Keyboard(OutputStream out) {
+        assert out != null;
 
-        this.crt = crt;
+        this.out = out;
     }
 
-    @SneakyThrows
     @Override
     public int read() throws IOException {
         while (currentCommand == null) {
             offset = 0;
             currentCommand = queue.poll();
-            if (currentCommand == null)
-                Thread.sleep(100);
+            if (currentCommand == null) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ignored) {}
+            }
             else
                 if (currentCommand.length() == 0)
                     currentCommand = null;
@@ -41,7 +47,7 @@ public class Keyboard extends InputStream implements Runnable, Consumer<String>{
             offset = 0;
         }
 
-        crt.coloredWrite(c);
+        out.write(colorize(String.valueOf((char) c), TXT_COLOR).getBytes());
         return c;
     }
 
@@ -49,7 +55,7 @@ public class Keyboard extends InputStream implements Runnable, Consumer<String>{
     public void run() {
         final Scanner scan = new Scanner(System.in);
         String command = scan.nextLine();
-        while (true && running) {
+        while (running) {
             queue.offer(command + "\n");
             command = scan.nextLine();
         }

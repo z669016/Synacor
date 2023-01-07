@@ -28,11 +28,10 @@ class InterpreterTest {
         memory = mock(Memory.class);
 
         registers = new Registers();
-        InputOutput io = new InputOutput(in, out);
         stack = new Stack<>();
         ip = new Register();
 
-        interpreter = new Interpreter(registers, memory, stack, io);
+        interpreter = new Interpreter(registers, memory, stack, in, out);
     }
 
     @Test

@@ -51,13 +51,16 @@ public class InstructionBase implements Instruction {
     }
 
     @Override
-    public String toString() {
+    public String dump(boolean smart) {
         final StringBuilder sb = new StringBuilder();
         sb.append(opcode);
         for (var op : operand) {
             sb.append(" ");
-            if (Registers.isRegister(op))
-                sb.append(Registers.asLetter(op)).append(" (").append(registers.get(op)).append(")");
+            if (Registers.isRegister(op)) {
+                sb.append(Registers.asLetter(op));
+                if (smart)
+                    sb.append(" (").append(registers.get(op)).append(")");
+            }
             else
                 sb.append(op);
         }

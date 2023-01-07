@@ -1,5 +1,9 @@
 package com.putoet.game;
 
+import lombok.SneakyThrows;
+
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Stack;
 
 public class Interpreter {
@@ -8,13 +12,15 @@ public class Interpreter {
     private final Registers registers;
     private final Memory memory;
     private final Stack<Integer> stack;
-    private final InputOutput io;
+    private final InputStream in;
+    private final OutputStream out;
 
-    public Interpreter(Registers registers, Memory memory, Stack<Integer> stack, InputOutput io) {
+    public Interpreter(Registers registers, Memory memory, Stack<Integer> stack, InputStream in, OutputStream out) {
         this.registers = registers;
         this.memory = memory;
         this.stack = stack;
-        this.io = io;
+        this.in = in;
+        this.out = out;
     }
 
     public Instruction next(Register ip) {
@@ -184,23 +190,26 @@ public class Interpreter {
             };
 
             case OUT -> new InstructionBase(opcode, 1, ip, memory, registers) {
+                @SneakyThrows
                 @Override
                 public void execute() {
                     final var value = value(ip, registers, operand[0]);
-                    io.out(value);
+                    out.write(value);
                 }
 
                 @Override
-                public String toString() {
+                public String dump(boolean smart) {
                     final StringBuilder sb = new StringBuilder();
                     sb.append(opcode);
                     for (var op : operand) {
                         sb.append(" ");
-                        if (Registers.isRegister(op))
-                            sb.append(Registers.asLetter(op))
-                                    .append(" ('")
-                                    .append(registers.get(op) == '\n' ? "\\n" : (char) registers.get(op))
-                                    .append("')");
+                        if (Registers.isRegister(op)) {
+                            sb.append(Registers.asLetter(op));
+                            if (smart)
+                                sb.append(" ('")
+                                        .append(registers.get(op) == '\n' ? "\\n" : (char) registers.get(op))
+                                        .append("')");
+                        }
                         else
                             sb.append("'").append(op == '\n' ? "\\n" : (char) op).append("'");
                     }
@@ -209,9 +218,10 @@ public class Interpreter {
             };
 
             case IN -> new InstructionBase(opcode, 1, ip, memory, registers) {
+                @SneakyThrows
                 @Override
                 public void execute() {
-                    var value = io.in();
+                    var value = in.read();
                     registers.set(operand[0], value);
                 }
             };

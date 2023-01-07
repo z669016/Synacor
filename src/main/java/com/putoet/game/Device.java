@@ -2,24 +2,28 @@ package com.putoet.game;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Device implements Runnable {
-    private static final DeviceDebugger DEFAULT_DEBUGGER = new DeviceDebugger() {};
+    public static final DeviceDebugger DEFAULT_DEBUGGER = new DeviceDebugger() {};
 
     private final Memory memory;
     private final Registers registers;
-    private final InputOutput io;
+    private final Keyboard in;
+    private final Crt out;
     private final Register ip = new Register();
     private final Stack<Integer> stack = new Stack<>();
+    private final AtomicReference<Instruction> currentInstruction = new AtomicReference<>(null);
 
     private DeviceDebugger debugger = DEFAULT_DEBUGGER;
 
     private boolean running = false;
 
-    public Device(Registers registers, Memory memory, InputOutput io) {
+    public Device(Registers registers, Memory memory, Keyboard in, Crt out) {
         this.registers = registers;
         this.memory = memory;
-        this.io = io;
+        this.in = in;
+        this.out = out;
     }
 
     public void loadResource(String resourceName) {
@@ -51,8 +55,11 @@ public class Device implements Runnable {
         return memory;
     }
 
-    public InputOutput io() {
-        return io;
+    public Keyboard in() {
+        return in;
+    }
+    public Crt out() {
+        return out;
     }
 
     public Registers registers() {
@@ -75,16 +82,25 @@ public class Device implements Runnable {
         this.debugger = DEFAULT_DEBUGGER;
     }
 
+    public boolean isConnected() {
+        return debugger != DEFAULT_DEBUGGER;
+    }
+
+    public Instruction currentInstruction() {
+        return currentInstruction.get();
+    }
+
     @Override
     public void run() {
         running = true;
-        final Interpreter interpreter = new Interpreter(registers, memory, stack, io);
+        final Interpreter interpreter = new Interpreter(registers, memory, stack, in, out);
 
-        var instruction = interpreter.next(ip());
-        while (instruction.opcode() != Opcode.HALT && running) {
-            debugger.debug(ip, instruction);
-            instruction.run();
-            instruction = interpreter.next(ip());
+        currentInstruction.set(interpreter.next(ip()));
+        while (currentInstruction.get().opcode() != Opcode.HALT && running) {
+            debugger.debug(ip, currentInstruction.get());
+            currentInstruction.get().run();
+
+            currentInstruction.set(interpreter.next(ip()));
         }
     }
 
@@ -92,11 +108,7 @@ public class Device implements Runnable {
         running = false;
     }
 
-    public void reset() {
-        registers.clear();
-        ip.accept(0);
-
-        while (!stack.isEmpty())
-            stack.pop();
+    public boolean exiting() {
+        return !running;
     }
 }
