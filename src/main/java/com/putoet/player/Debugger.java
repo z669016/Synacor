@@ -181,7 +181,7 @@ public class Debugger implements Runnable, DeviceDebugger {
      * @return formatted string
      */
     private String currentInstruction(Register ip, Instruction instruction) {
-        return "%05d: %s".formatted(ip.get(), instruction.toString());
+        return "%05d: %s".formatted(ip.get(), instruction.dump(true));
     }
 
     /**
