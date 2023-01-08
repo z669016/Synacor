@@ -1,3 +1,4 @@
+# commands to solve the Synacore challenge
 take tablet
 use tablet
 doorway
@@ -41,13 +42,29 @@ up
 take shiny coin
 down
 east
+
+# Unlock the door
 use blue coin
 use red coin
 use shiny coin
 use concave coin
 use corroded coin
+
 north
 take teleporter
 use teleporter
+
 take business card
 take strange book
+look strange book
+
+# fix the teleporter before using it
+# disable instruction at 05489 and 05491 (confirmation code, just takes too long)
+/wmem 05489 21 2
+/wmem 05491 21 4
+# set <h> to the magic number of the modified Ackermann algorithm
+/set h 25734
+# and then teleport yourself :-)
+use teleporter
+
+# done?

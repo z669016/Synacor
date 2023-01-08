@@ -48,7 +48,7 @@ public class Debugger implements Runnable, DeviceDebugger {
      * @param instruction device next instruction to be executed
      */
     @Override
-    public void debug(Register ip, Instruction instruction) {
+    public Instruction debug(Register ip, Instruction instruction) {
         if (breakpoints.contains(ip.get()) || breakOnNext.get()) {
             deviceHalted.set(true);
         }
@@ -83,12 +83,37 @@ public class Debugger implements Runnable, DeviceDebugger {
                     breakOnNext.set(true);
             }
 
-            return;
+            return instruction;
         }
 
         if (print) {
             System.out.println(colorize("%05d: %s".formatted(ip.get(), instruction), TXT_COLOR));
         }
+
+        return instruction;
+    }
+
+    /**
+     * Debug any commands before continuing of processing by the device/keyboard. If the command starts with
+     * a "/" process it as a debugger command and return null. Otherwise, return the command to the caller.
+     *
+     * @param command String
+     *
+     * @return null (if command starts with "/", otherwise return original command
+     */
+    @Override
+    public String debug(String command) {
+        assert command != null;
+
+        if (command.startsWith("/")) {
+            if (command.endsWith("\n"))
+                command = command.substring(1, command.length() - 1);
+            System.out.println("Execute debugger command: " + command);
+            execute(command);
+            return null;
+        }
+
+        return command;
     }
 
     /**
@@ -134,7 +159,7 @@ public class Debugger implements Runnable, DeviceDebugger {
      *
      * @param command the debugger command to execute
      */
-    private void execute(String command) {
+    public void execute(String command) {
         assert command != null;
 
         if (command.length() == 0)
@@ -144,6 +169,8 @@ public class Debugger implements Runnable, DeviceDebugger {
 
         if (command.startsWith("set ")) {
             setRegister(command);
+        } else if (command.startsWith("wmem")) {
+            wmem(command);
         } else if (command.startsWith("br")) {
             breakpoint(command);
         } else if (command.startsWith("dump ")) {
@@ -172,6 +199,26 @@ public class Debugger implements Runnable, DeviceDebugger {
         }
     }
 
+    /**
+     * Write memory (wmem address value {length}). The address must be a decimal number, and the value may be decimal
+     * or hex (preceded by '0x'). Length is optional and when set, the "length"  range of addresses will set with the
+     * specified value. This allows a series of consecutive addresses to be set to the same value.
+     *
+     * @param command the complete command
+     */
+    private void wmem(String command) {
+        var params = command.substring(5);
+        if (params.length() == 0)
+            throw new IllegalArgumentException("Invalid wmem command: " + command);
+
+        final var split = params.split(" ");
+        var address = Integer.parseInt(split[0]);
+        final var value = split.length > 1 ? fromNumber(split[1]) : 0;
+        var count = split.length > 2 ? Integer.parseInt(split[2]) : 1;
+        while (count-- > 0) {
+            device.memory().write(address++, value);
+        }
+    }
 
     /**
      * The current instruction as formatter string including memory address
@@ -248,6 +295,7 @@ public class Debugger implements Runnable, DeviceDebugger {
             case "f" -> "find";
             case "h" -> "hex";
             case "s" -> "state";
+            case "w" -> "wmem";
             case "?" -> "current instruction";
             default -> split[0];
         };
@@ -287,6 +335,7 @@ public class Debugger implements Runnable, DeviceDebugger {
             stack               - dump contents of the stack
             state               - dump IP and register state
             up                  - execute until and including next RET statement  and halt
+            wmem                - write a value to a memory position
             
             For into, up, and over to work, the debugger must be 'connected' first!
             
@@ -464,14 +513,20 @@ public class Debugger implements Runnable, DeviceDebugger {
 
         final Register ip = new Register();
         ip.accept(startAddress);
-        while (ip.get() <= device.memory().lastAddressUsed()) {
-            var instruction = interpreter.next(ip);
-            dump.add("%05d: %s".formatted(ip.get(), instruction.dump(smart)));
+        try {
+            while (ip.get() <= device.memory().lastAddressUsed()) {
+                var instruction = interpreter.next(ip);
+                dump.add("%05d: %s".formatted(ip.get(), instruction.dump(smart)));
 
-            if (exitCriteria.contains(instruction.opcode()))
-                break;
+                if (exitCriteria.contains(instruction.opcode()))
+                    break;
 
-            ip.accept(ip.get() + instruction.size());
+                ip.accept(ip.get() + instruction.size());
+            }
+        } catch (RuntimeException exc) {
+            dump.add("Instruction fetch failed at address " + ip.get());
+            dump.add(exc.getMessage());
+            dump.add(exc.getStackTrace()[0].toString());
         }
 
         return dump;

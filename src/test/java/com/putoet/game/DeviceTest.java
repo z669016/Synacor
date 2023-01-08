@@ -35,4 +35,20 @@ class DeviceTest {
         assertEquals('a' + 4, registers.get(32768));
         verify(out).write('a' + 4);
     }
+
+    @Test
+    void sub1531() {
+//        SET <a> 26851
+//        SET <b> 1531
+//        ADD <c> 14984 15478
+
+//        AND <c> <a> <b>
+//        NOT <c> <c>
+//        OR <a> <a> <b>
+//        AND <a> <a> <c>
+
+
+
+
+    }
 }

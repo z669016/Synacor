@@ -18,9 +18,7 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class Device implements Runnable {
-    public static final DeviceDebugger DEFAULT_DEBUGGER = new DeviceDebugger() {};
-
+public class Device implements Runnable, DebuggerSupport {
     private final Memory memory;
     private final Registers registers;
     private final Keyboard in;
@@ -29,7 +27,7 @@ public class Device implements Runnable {
     private final Stack<Integer> stack = new Stack<>();
     private final AtomicReference<Instruction> currentInstruction = new AtomicReference<>(null);
 
-    private DeviceDebugger debugger = DEFAULT_DEBUGGER;
+    private DeviceDebugger debugger = DebuggerSupport.DEFAULT_DEBUGGER;
 
     private boolean running = false;
 
@@ -152,13 +150,15 @@ public class Device implements Runnable {
      */
     public void setDebugger(DeviceDebugger debugger) {
         this.debugger = debugger;
+        this.in.setDebugger(debugger);
     }
 
     /**
      * Reset the debugger to the default DeviceDebugger implementation
      */
     public void resetDebugger() {
-        this.debugger = DEFAULT_DEBUGGER;
+        this.debugger = DebuggerSupport.DEFAULT_DEBUGGER;
+        this.in.resetDebugger();
     }
 
     /**
@@ -167,7 +167,7 @@ public class Device implements Runnable {
      * @return true if a custom debugger is set
      */
     public boolean isConnected() {
-        return debugger != DEFAULT_DEBUGGER;
+        return debugger != DebuggerSupport.DEFAULT_DEBUGGER;
     }
 
     /**
@@ -192,8 +192,8 @@ public class Device implements Runnable {
 
         currentInstruction.set(interpreter.next(ip()));
         while (currentInstruction.get().opcode() != Opcode.HALT && running) {
-            debugger.debug(ip, currentInstruction.get());
-            currentInstruction.get().run();
+            var instruction = debugger.debug(ip, currentInstruction.get());
+            instruction.run();
 
             currentInstruction.set(interpreter.next(ip()));
         }

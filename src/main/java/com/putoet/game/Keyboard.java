@@ -27,11 +27,13 @@ import java.util.function.Consumer;
 
 import static com.diogonunes.jcolor.Ansi.colorize;
 
-public class Keyboard extends InputStream implements Runnable, Consumer<String>{
+public class Keyboard extends InputStream implements Runnable, Consumer<String>, DebuggerSupport {
     public static final Attribute TXT_COLOR = Attribute.GREEN_TEXT();
     private final Queue<String> queue = new ArrayBlockingQueue <>(1000);
     private final OutputStream out;
     private String currentCommand = null;
+    private DeviceDebugger debugger = DebuggerSupport.DEFAULT_DEBUGGER;
+
     private int offset = 0;
     private boolean running = true;
 
@@ -59,15 +61,31 @@ public class Keyboard extends InputStream implements Runnable, Consumer<String>{
      */
     @Override
     public int read() throws IOException {
+        // while no command available
         while (currentCommand == null) {
             offset = 0;
             currentCommand = queue.poll();
+
+            // ignore empty commands
+            if (currentCommand != null && currentCommand.length() == 0)
+                currentCommand = null;
+
+            // If command starts with # it's comment, just ignore it
+            if (currentCommand != null && currentCommand.startsWith("#"))
+                currentCommand = null;
+
+            // Pass the command through the debugger first
+            if (currentCommand != null) {
+                currentCommand = debugger.debug(currentCommand);
+            }
+
+            // if no command available sleep for a while
             if (currentCommand == null) {
                 try {
                     Thread.sleep(100);
-                } catch (InterruptedException ignored) {}
-            } else if (currentCommand.length() == 0)
-                currentCommand = null;
+                } catch (InterruptedException ignored) {
+                }
+            }
         }
 
         final int c = currentCommand.charAt(offset++);
@@ -111,5 +129,15 @@ public class Keyboard extends InputStream implements Runnable, Consumer<String>{
      */
     public void exit() {
         running = false;
+    }
+
+    @Override
+    public void setDebugger(DeviceDebugger debugger) {
+        this.debugger = debugger;
+    }
+
+    @Override
+    public void resetDebugger() {
+        this.debugger = DebuggerSupport.DEFAULT_DEBUGGER;
     }
 }
