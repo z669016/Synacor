@@ -3,7 +3,7 @@
  * Holds a set of 8 registers, with an ID ranging form 32768 to 32775 which corresponds to the names
  * 'a' through 'h' (although the individual registers ar unaware of any name).
  */
-package com.putoet.game;
+package com.putoet.device;
 
 public class Registers {
     public static final int ARCH_MAX_VALUE = 32768;

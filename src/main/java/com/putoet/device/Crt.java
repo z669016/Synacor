@@ -6,7 +6,7 @@
  * Beware, only write(int) and write(byte[]) reroute to the target output stream, other OutputStream
  * methods are not implemented and thus not connected!
  */
-package com.putoet.game;
+package com.putoet.device;
 
 import java.io.IOException;
 import java.io.OutputStream;

@@ -1,7 +1,7 @@
-package com.putoet.player;
+package com.putoet.debugger;
 
 import com.diogonunes.jcolor.Attribute;
-import com.putoet.game.*;
+import com.putoet.device.*;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;

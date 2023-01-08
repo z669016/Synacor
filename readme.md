@@ -1,4 +1,4 @@
-# [Synacore challenge](https://challenge.synacor.com/)
+# [Synacor challenge](https://challenge.synacor.com/)
 
 Parts of the puzzle I didn't like that much. Analyzing byte code just isn't my thing. However, 
 writing the VM and implementing a debugger to step through code and update the code while running
@@ -33,5 +33,14 @@ Gathered codes along the way:
 - Code after successful teleportation: WQXztEwCdxHW
 - Code in the mirror: AudlVOilwdlO --> OlbwliOVlbuA (mirrored, so backwards and flip d to b)
 
+The Synacore challenge has much similarity with the Intcode device from 2019. I didnt reuse any code and
+started this one from scratch. Afterwards I've compared the two solutions, and found many similarities
+in my design and implementation, but differences as well.
 
- 
+The addition of the keyboard to pass commands was new, and of course for AoC 2019, no Debugger was 
+required. All in all, by no means a perfect design this time, but much better compared to my 2019 
+implementation of the Intcode device.
+
+I do need to apologize for the lack of unit tests ... I never mastered the discipline of TDD, and 
+because I took many small incremental steps during design and implementation, I didn't feel an 
+urgent need for unit tests either

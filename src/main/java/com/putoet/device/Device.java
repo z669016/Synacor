@@ -12,7 +12,7 @@
  * Fetching means that currentStatement is set to the next to-be-executed statement.
  * The default debugger is the empty implementation of the DeviceDebugger interface.
  */
-package com.putoet.game;
+package com.putoet.device;
 
 import java.io.*;
 import java.util.*;

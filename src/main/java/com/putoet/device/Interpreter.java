@@ -9,7 +9,7 @@
  * the IP register, and any instruction with operands requires access to the Registers components (as an operand value
  * of 32678 and could refer to a register and not a value or memory location).
  */
-package com.putoet.game;
+package com.putoet.device;
 
 import lombok.SneakyThrows;
 

@@ -2,7 +2,7 @@
  * Register class, implements Supplier<Integer>, and Consumer<Integer>
  * An register can get() and accept() values
  */
-package com.putoet.game;
+package com.putoet.device;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;

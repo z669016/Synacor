@@ -4,9 +4,9 @@
  * a resource called "/solution.txt" which all get fed into the keyboard buffer for processing.
  * Connects a Debugger to the device,a d runs the device and keyboard in separate threads.
  */
-package com.putoet.player;
+package com.putoet.debugger;
 
-import com.putoet.game.*;
+import com.putoet.device.*;
 import lombok.SneakyThrows;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-public class Player {
+public class Autorun {
 
     @SneakyThrows
     public static void main(String[] args) {
@@ -48,7 +48,7 @@ public class Player {
      */
     @SneakyThrows
     public static List<String> list(String resourceName) {
-        final URL url = Player.class.getResource(resourceName);
+        final URL url = Autorun.class.getResource(resourceName);
         if (url == null)
             throw new IllegalArgumentException("Invalid resource name '" + resourceName + "'");
 

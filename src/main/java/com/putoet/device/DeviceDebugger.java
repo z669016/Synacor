@@ -1,4 +1,4 @@
-package com.putoet.game;
+package com.putoet.device;
 
 /**
  * Interface for communication between a component and the debugger. Through the debug() method, a component

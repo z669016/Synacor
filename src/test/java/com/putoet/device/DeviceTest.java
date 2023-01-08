@@ -1,4 +1,4 @@
-package com.putoet.game;
+package com.putoet.device;
 
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;

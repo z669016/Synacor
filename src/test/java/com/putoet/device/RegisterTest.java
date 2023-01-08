@@ -1,4 +1,4 @@
-package com.putoet.game;
+package com.putoet.device;
 
 import org.junit.jupiter.api.Test;
 

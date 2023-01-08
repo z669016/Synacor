@@ -1,4 +1,4 @@
-package com.putoet.game;
+package com.putoet.device;
 
 public interface Instruction extends Runnable {
     Opcode opcode();

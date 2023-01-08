@@ -6,7 +6,7 @@
  * ordered bytes. While accessing memory, there is no checking of memory boundaries, so if an address points outside
  * or the memory, an ArrayIndexOutOfBounds will be thrown.
  */
-package com.putoet.game;
+package com.putoet.device;
 
 public class Memory {
     private final byte[] memory = new byte[Registers.ARCH_MAX_VALUE * 2];

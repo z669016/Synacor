@@ -1,4 +1,4 @@
-package com.putoet.game;
+package com.putoet.device;
 
 /**
  * Interface to support debugging

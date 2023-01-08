@@ -7,7 +7,7 @@
  * operands of the instruction however have already been fetched and cannot change (at least, the Instruction interface
  * doesn't allow them to be changed).
  */
-package com.putoet.game;
+package com.putoet.device;
 
 public class InstructionBase implements Instruction {
     protected final Opcode opcode;

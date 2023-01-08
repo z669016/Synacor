@@ -13,7 +13,7 @@
  * Each character offered to the In component is echoed to an OutputStream connected to the keyboard on construction.
  * This class uses com.diogonunes.jcolor to colorize the echoed character to the OutputStream.
  */
-package com.putoet.game;
+package com.putoet.device;
 
 import com.diogonunes.jcolor.Attribute;
 
