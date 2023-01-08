@@ -67,7 +67,7 @@ public class Keyboard extends InputStream implements Runnable, Consumer<String>,
             currentCommand = queue.poll();
 
             // ignore empty commands
-            if (currentCommand != null && currentCommand.length() == 0)
+            if ("\n".equals(currentCommand))
                 currentCommand = null;
 
             // If command starts with # it's comment, just ignore it
